@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+body {
+  font-family: var(--font-geist-sans);
+}
+
+.hero-bg {
+  background: linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), 
+              url('https://picsum.photos/id/1015/1920/1080');
+  background-size: cover;
+  background-position: center;
+}
