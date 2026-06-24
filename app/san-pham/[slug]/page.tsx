@@ -1,25 +1,27 @@
 import Footer from "@/app/components/Footer";
 import Navbar from "@/app/components/Navbar";
-import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
+import AddToCartButton from "@/app/components/AddToCartButton";
+import ProductGallery from "@/app/components/ProductGallery";
 
 type Product = {
   id: string;
   name: string;
   price: number;
   image?: string;
-  desc?: string;
+  description?: string;
   category?: string;
 };
 
-export default async function ProductDetail({ params }: { params: { slug: string } }) {
+export default async function ProductDetail({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const supabase = createClient();
   
   const { data: product, error } = await supabase
     .from("products")
     .select("*")
-    .eq("id", params.slug)
+    .eq("id", slug)
     .single();
 
   if (error || !product) {
@@ -39,61 +41,71 @@ export default async function ProductDetail({ params }: { params: { slug: string
     );
   }
 
+  // Phân tách JSON mô tả để lấy nội dung HTML và danh sách ảnh phụ
+  let descriptionHtml = product.description || "";
+  let subImages: string[] = [];
+  if (product.description && product.description.startsWith("{") && product.description.endsWith("}")) {
+    try {
+      const parsed = JSON.parse(product.description);
+      descriptionHtml = parsed.content || "";
+      subImages = Array.isArray(parsed.subImages) ? parsed.subImages : [];
+    } catch (e) {
+      // Fallback nếu không phải JSON
+    }
+  }
+
   return (
     <>
       <Navbar />
       <div className="max-w-7xl mx-auto px-6 py-16">
         <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-start">
-          {/* Hình ảnh */}
-          <div className="sticky top-24">
-            {product.image ? (
-              <Image 
-                src={product.image} 
-                alt={product.name} 
-                width={800} 
-                height={600} 
-                className="rounded-3xl shadow-xl w-full object-cover" 
-                priority
-              />
-            ) : (
-              <div className="bg-gray-200 aspect-square rounded-3xl flex items-center justify-center">
-                <span className="text-5xl text-gray-400">📷</span>
-              </div>
-            )}
-          </div>
+          {/* Bộ sưu tập hình ảnh */}
+          <ProductGallery 
+            primaryImage={product.image} 
+            subImages={subImages} 
+            productName={product.name} 
+          />
 
           {/* Thông tin sản phẩm */}
-          <div className="pt-4">
-            {product.category && (
-              <p className="text-blue-600 font-medium mb-2">{product.category}</p>
-            )}
-            
-            <h1 className="text-4xl lg:text-5xl font-bold mb-6 leading-tight">
-              {product.name}
-            </h1>
+          <div className="pt-4 space-y-6">
+            <div>
+              {product.category && (
+                <p className="text-blue-600 font-semibold text-sm tracking-wide uppercase mb-2">{product.category}</p>
+              )}
+              
+              <h1 className="text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight">
+                {product.name}
+              </h1>
+            </div>
 
-            <p className="text-4xl font-bold text-blue-600 mb-10">
+            <p className="text-4xl font-black text-blue-600">
               {product.price.toLocaleString('vi-VN')}đ
             </p>
 
-            {product.desc && (
-              <div className="prose prose-lg text-gray-600 mb-12">
-                <p>{product.desc}</p>
-              </div>
-            )}
+            <AddToCartButton product={{
+              id: product.id,
+              name: product.name,
+              price: product.price,
+              image: product.image
+            }} />
 
-            <Link 
-              href={`/mua-hang?product=${encodeURIComponent(product.name)}&price=${product.price}`}
-              className="block w-full text-center bg-black hover:bg-gray-900 text-white py-5 rounded-2xl text-xl font-semibold transition"
-            >
-              Mua ngay
-            </Link>
-
-            <p className="text-center text-sm text-gray-500 mt-6">
-              Liên hệ ngay nếu bạn có thắc mắc
-            </p>
+            <div className="border-t pt-6 text-sm text-gray-500 space-y-2">
+              <p className="flex items-center gap-2">🛡️ Hàng chính hãng 100%</p>
+              <p className="flex items-center gap-2">🚚 Giao hàng nhanh chóng toàn quốc</p>
+            </div>
           </div>
         </div>
+
+        {/* Giới thiệu chi tiết kiểu các sàn lớn */}
+        {descriptionHtml && (
+          <div className="mt-16 border-t pt-12 max-w-4xl">
+            <h2 className="text-2xl font-bold text-gray-900 mb-8 border-l-4 border-black pl-4">Giới thiệu sản phẩm</h2>
+            <div 
+              className="prose max-w-none text-gray-700 leading-relaxed font-sans prose-img:rounded-3xl prose-headings:font-bold whitespace-pre-wrap"
+              dangerouslySetInnerHTML={{ __html: descriptionHtml }}
+            />
+          </div>
+        )}
       </div>
       <Footer />
     </>

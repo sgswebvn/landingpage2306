@@ -6,16 +6,13 @@ import { createClient } from "@/lib/supabase";
 
 export default function AdminCustomers() {
   const [customers, setCustomers] = useState<any[]>([]);
-  const supabase = createClient();
-
   useEffect(() => {
-    // Lấy unique khách hàng từ orders
-    supabase.from("orders")
-      .select("name, phone, address")
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        if (data) {
-          const unique = Array.from(new Map(data.map(item => [item.phone, item])).values());
+    // Lấy unique khách hàng từ API orders
+    fetch("/api/admin/orders")
+      .then(res => res.json())
+      .then(result => {
+        if (result.success && result.orders) {
+          const unique = Array.from(new Map(result.orders.map((item: any) => [item.phone, item])).values());
           setCustomers(unique);
         }
       });

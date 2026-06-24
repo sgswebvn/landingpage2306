@@ -10,8 +10,9 @@ type Product = {
   price: number;
   image?: string;
   category?: string;
-  desc?: string;
+  description?: string;
 };
+
 
 export default async function SanPhamPage() {
   const supabase = createClient();

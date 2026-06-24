@@ -27,6 +27,28 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error;
 
+    // Đồng bộ lên Google Sheets qua Webhook (nếu có cấu hình)
+    const googleSheetWebhookUrl = process.env.GOOGLE_SHEET_WEBHOOK_URL;
+    if (googleSheetWebhookUrl) {
+      try {
+        await fetch(googleSheetWebhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderId: data.id,
+            name: data.name,
+            phone: data.phone,
+            address: data.address,
+            products: data.product,
+            totalPrice: data.price,
+            note: data.note || ''
+          })
+        });
+      } catch (webhookError) {
+        console.error("Gửi Google Sheets thất bại nhưng đơn hàng đã được lưu:", webhookError);
+      }
+    }
+
     return NextResponse.json({ success: true, order: data });
   } catch (error: any) {
     console.error('Submit Order Error:', error);
@@ -35,4 +57,4 @@ export async function POST(request: NextRequest) {
       error: error.message 
     }, { status: 500 });
   }
-}
+}

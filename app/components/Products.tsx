@@ -1,31 +1,56 @@
 import Link from "next/link";
 import Image from "next/image";
+import { createClient } from "@/lib/supabase";
 
-const sampleProducts = [
-  { id: 1, name: "Sản phẩm 1", price: "450000", slug: "san-pham-1", image: "https://picsum.photos/id/20/400/300" },
-  { id: 2, name: "Sản phẩm 2", price: "650000", slug: "san-pham-2", image: "https://picsum.photos/id/201/400/300" },
-  { id: 3, name: "Sản phẩm 3", price: "320000", slug: "san-pham-3", image: "https://picsum.photos/id/237/400/300" },
-];
+type Product = {
+  id: string;
+  name: string;
+  price: number;
+  image?: string;
+  category?: string;
+  description?: string;
+};
 
-export default function Products() {
+export default async function Products() {
+  const supabase = createClient();
+  const { data: products } = await supabase
+    .from("products")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(3);
+
   return (
     <section className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-6">
         <h2 className="text-4xl font-bold text-center mb-4">Sản phẩm nổi bật</h2>
-        <p className="text-center text-gray-600 mb-12">Những sản phẩm bán chạy nhất</p>
+        <p className="text-center text-gray-600 mb-12">Những sản phẩm mới nhất</p>
 
         <div className="grid md:grid-cols-3 gap-8">
-          {sampleProducts.map((product) => (
-            <Link key={product.id} href={`/san-pham/${product.slug}`} className="group">
-              <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition">
-                <Image src={product.image} alt={product.name} width={400} height={300} className="w-full h-64 object-cover" />
-                <div className="p-6">
-                  <h3 className="font-semibold text-xl mb-2">{product.name}</h3>
-                  <p className="text-2xl font-bold text-blue-600">{Number(product.price).toLocaleString('vi-VN')}đ</p>
+          {products && products.length > 0 ? (
+            products.map((product: Product) => (
+              <Link key={product.id} href={`/san-pham/${product.id}`} className="group">
+                <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition">
+                  <div className="relative h-64 w-full">
+                    {product.image ? (
+                      <Image src={product.image} alt={product.name} fill className="object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400">
+                        No image
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-6">
+                    <h3 className="font-semibold text-xl mb-2">{product.name}</h3>
+                    <p className="text-2xl font-bold text-blue-600">{product.price.toLocaleString('vi-VN')}đ</p>
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))
+          ) : (
+            <div className="col-span-full text-center py-10 text-gray-500">
+              Chưa có sản phẩm nào nổi bật.
+            </div>
+          )}
         </div>
 
         <div className="text-center mt-12">
@@ -34,4 +59,4 @@ export default function Products() {
       </div>
     </section>
   );
-}
+}

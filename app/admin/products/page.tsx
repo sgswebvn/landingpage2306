@@ -13,7 +13,7 @@ type Product = {
   price: number;
   image?: string;
   category?: string;
-  desc?: string;
+  description?: string;
   created_at: string;
 };
 
@@ -96,7 +96,7 @@ export default function AdminProducts() {
                     )}
                     <div>
                       <p className="font-medium">{product.name}</p>
-                      <p className="text-sm text-gray-500 line-clamp-1">{product.desc}</p>
+                      <p className="text-sm text-gray-500 line-clamp-1">{product.description}</p>
                     </div>
                   </div>
                 </td>
