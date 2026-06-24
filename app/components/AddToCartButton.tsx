@@ -29,19 +29,19 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
   };
 
   return (
-    <div className="flex flex-col sm:flex-row gap-4 mt-8">
+    <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t w-full">
       <button
         type="button"
         onClick={handleAddToCart}
-        className="flex-1 flex items-center justify-center gap-2 border-2 border-black hover:bg-gray-50 text-black py-4 px-6 rounded-2xl text-lg font-semibold transition cursor-pointer"
+        className="flex-1 flex items-center justify-center gap-2 border-2 border-black hover:bg-gray-50 text-black py-4 px-6 rounded-full text-base font-bold transition-all cursor-pointer active:scale-98"
       >
-        <ShoppingCart size={20} />
+        <ShoppingCart size={18} />
         Thêm vào giỏ hàng
       </button>
       <button
         type="button"
         onClick={handleBuyNow}
-        className="flex-1 bg-black hover:bg-gray-900 text-white py-4 px-6 rounded-2xl text-lg font-semibold transition cursor-pointer"
+        className="flex-1 bg-black hover:bg-gray-800 text-white py-4 px-6 rounded-full text-base font-bold transition-all cursor-pointer active:scale-98"
       >
         Mua ngay
       </button>

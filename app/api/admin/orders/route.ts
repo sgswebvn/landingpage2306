@@ -17,8 +17,8 @@ export async function GET(request: NextRequest) {
     }
   );
 
-  const { data: { session } } = await supabaseAuth.auth.getSession();
-  if (!session) {
+  const { data: { user } } = await supabaseAuth.auth.getUser();
+  if (!user) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
@@ -55,8 +55,8 @@ export async function PATCH(request: NextRequest) {
     }
   );
 
-  const { data: { session } } = await supabaseAuth.auth.getSession();
-  if (!session) {
+  const { data: { user } } = await supabaseAuth.auth.getUser();
+  if (!user) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
@@ -96,8 +96,8 @@ export async function DELETE(request: NextRequest) {
     }
   );
 
-  const { data: { session } } = await supabaseAuth.auth.getSession();
-  if (!session) {
+  const { data: { user } } = await supabaseAuth.auth.getUser();
+  if (!user) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 

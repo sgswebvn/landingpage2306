@@ -38,38 +38,65 @@ export default async function SanPhamPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {products && products.length > 0 ? (
-              products.map((product: Product) => (
-                <Link 
-                  key={product.id} 
-                  href={`/san-pham/${product.id}`}
-                  className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300"
-                >
-                  <div className="relative h-64">
-                    {product.image ? (
-                      <Image 
-                        src={product.image} 
-                        alt={product.name} 
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-500" 
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                        <span className="text-gray-400">No image</span>
+              products.map((product: Product) => {
+                let originalPrice: number | null = null;
+                if (product.description && product.description.startsWith("{") && product.description.endsWith("}")) {
+                  try {
+                    const parsed = JSON.parse(product.description);
+                    originalPrice = parsed.originalPrice ? Number(parsed.originalPrice) : null;
+                  } catch (e) {
+                    // Fallback
+                  }
+                }
+                const discountPercent = originalPrice && originalPrice > product.price 
+                  ? Math.round(((originalPrice - product.price) / originalPrice) * 100) 
+                  : 0;
+
+                return (
+                  <Link 
+                    key={product.id} 
+                    href={`/san-pham/${product.id}`}
+                    className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300"
+                  >
+                    <div className="relative h-64">
+                      {product.image ? (
+                        <Image 
+                          src={product.image} 
+                          alt={product.name} 
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500" 
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                          <span className="text-gray-400">No image</span>
+                        </div>
+                      )}
+                      {discountPercent > 0 && (
+                        <div className="absolute top-4 right-4 bg-red-600 text-white text-xs font-black px-2.5 py-1 rounded-md shadow-md">
+                          -{discountPercent}%
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="p-6">
+                      {product.category && (
+                        <p className="text-blue-600 text-sm font-medium mb-2">{product.category}</p>
+                      )}
+                      <h3 className="font-semibold text-xl mb-3 line-clamp-2">{product.name}</h3>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-2xl font-bold text-blue-600">
+                          {product.price.toLocaleString('vi-VN')}đ
+                        </span>
+                        {originalPrice && originalPrice > product.price && (
+                          <span className="text-sm font-medium text-gray-400 line-through">
+                            {originalPrice.toLocaleString('vi-VN')}đ
+                          </span>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  
-                  <div className="p-6">
-                    {product.category && (
-                      <p className="text-blue-600 text-sm font-medium mb-2">{product.category}</p>
-                    )}
-                    <h3 className="font-semibold text-xl mb-3 line-clamp-2">{product.name}</h3>
-                    <p className="text-2xl font-bold text-blue-600">
-                      {product.price.toLocaleString('vi-VN')}đ
-                    </p>
-                  </div>
-                </Link>
-              ))
+                    </div>
+                  </Link>
+                );
+              })
             ) : (
               <div className="col-span-full text-center py-20 text-gray-500">
                 Chưa có sản phẩm nào. Hãy thêm sản phẩm trong trang Admin.

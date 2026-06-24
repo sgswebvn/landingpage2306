@@ -30,6 +30,7 @@ export default function EditProduct({ params }: { params: Promise<{ id: string }
   const [form, setForm] = useState({
     name: "",
     price: "",
+    originalPrice: "",
     category: "",
     description: "",
   });
@@ -45,11 +46,13 @@ export default function EditProduct({ params }: { params: Promise<{ id: string }
       // Parse description JSON (html content + sub-images gallery)
       let content = data.description || "";
       let gallery: string[] = [];
+      let originalPriceVal = "";
       if (data.description && data.description.startsWith("{") && data.description.endsWith("}")) {
         try {
           const parsed = JSON.parse(data.description);
           content = parsed.content || "";
           gallery = Array.isArray(parsed.subImages) ? parsed.subImages : [];
+          originalPriceVal = parsed.originalPrice ? parsed.originalPrice.toString() : "";
         } catch (e) {
           // fallback
         }
@@ -58,6 +61,7 @@ export default function EditProduct({ params }: { params: Promise<{ id: string }
       setForm({
         name: data.name,
         price: data.price.toString(),
+        originalPrice: originalPriceVal,
         category: data.category || "",
         description: content,
       });
@@ -147,7 +151,8 @@ export default function EditProduct({ params }: { params: Promise<{ id: string }
 
     const serializedDescription = JSON.stringify({
       content: form.description,
-      subImages: combinedSubImages
+      subImages: combinedSubImages,
+      originalPrice: form.originalPrice ? parseInt(form.originalPrice) : null
     });
 
     const { error } = await supabase
@@ -253,7 +258,7 @@ export default function EditProduct({ params }: { params: Promise<{ id: string }
           </div>
 
           {/* Section 2: Form inputs */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Tên sản phẩm *</label>
               <input 
@@ -266,12 +271,23 @@ export default function EditProduct({ params }: { params: Promise<{ id: string }
             </div>
             
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Giá bán (VND) *</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Giá bán thực tế *</label>
               <input 
                 type="number" 
                 required 
                 value={form.price} 
                 onChange={(e) => setForm({ ...form, price: e.target.value })} 
+                className="w-full px-5 py-3.5 border border-gray-200 dark:border-gray-800 rounded-2xl focus:outline-none focus:border-black dark:focus:border-white transition" 
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Giá gốc (Chưa giảm)</label>
+              <input 
+                type="number" 
+                placeholder="Để gạch ngang"
+                value={form.originalPrice} 
+                onChange={(e) => setForm({ ...form, originalPrice: e.target.value })} 
                 className="w-full px-5 py-3.5 border border-gray-200 dark:border-gray-800 rounded-2xl focus:outline-none focus:border-black dark:focus:border-white transition" 
               />
             </div>

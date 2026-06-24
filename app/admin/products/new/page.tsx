@@ -25,6 +25,7 @@ export default function NewProduct() {
   const [form, setForm] = useState({
     name: "",
     price: "",
+    originalPrice: "",
     category: "",
     description: "", // HTML content will be stored here
   });
@@ -95,10 +96,11 @@ export default function NewProduct() {
       subImageUrls = uploadedUrls.filter((url): url is string => !!url);
     }
 
-    // Save description as JSON containing html content and list of sub image urls
+    // Save description as JSON containing html content, list of sub image urls and original price
     const serializedDescription = JSON.stringify({
       content: form.description,
-      subImages: subImageUrls
+      subImages: subImageUrls,
+      originalPrice: form.originalPrice ? parseInt(form.originalPrice) : null
     });
 
     const { error } = await supabase.from("products").insert({
@@ -187,7 +189,7 @@ export default function NewProduct() {
           </div>
 
           {/* Section 2: General details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Tên sản phẩm *</label>
               <input 
@@ -201,13 +203,24 @@ export default function NewProduct() {
             </div>
             
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Giá bán (VND) *</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Giá bán thực tế *</label>
               <input 
                 type="number" 
                 required 
-                placeholder="Ví dụ: 350000"
+                placeholder="Giá khách thanh toán"
                 value={form.price} 
                 onChange={(e) => setForm({ ...form, price: e.target.value })} 
+                className="w-full px-5 py-3.5 border border-gray-200 dark:border-gray-800 rounded-2xl focus:outline-none focus:border-black dark:focus:border-white transition" 
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Giá gốc (Chưa giảm)</label>
+              <input 
+                type="number" 
+                placeholder="Để gạch ngang"
+                value={form.originalPrice} 
+                onChange={(e) => setForm({ ...form, originalPrice: e.target.value })} 
                 className="w-full px-5 py-3.5 border border-gray-200 dark:border-gray-800 rounded-2xl focus:outline-none focus:border-black dark:focus:border-white transition" 
               />
             </div>
